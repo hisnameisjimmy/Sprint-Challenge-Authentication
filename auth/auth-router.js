@@ -7,17 +7,22 @@ const Users = require("../users/users-model.js");
 
 router.post('/register', (req, res) => {
   let user = req.body;
-  const hash = bcrypt.hashSync(user.password, 10);
-  user.password = hash;
 
-  Users.add(user)
-    .then(saved => {
-      const token = genToken(saved);
-      res.status(201).json({ created_user: saved, token: token });
-    })
-    .catch(error => {
-      res.status(500).json(error);
-    });
+  if (user.username && user.password) {
+    const hash = bcrypt.hashSync(user.password, 10);
+    user.password = hash;
+    Users.add(user)
+      .then(saved => {
+        const token = genToken(saved);
+        res.status(201).json({ created_user: saved, token: token });
+      })
+      .catch(error => {
+        res.status(500).json(error);
+      });
+  } else {
+    res.status(400).json({ message: "Both username and password are required" });
+  }
+
 });
 
 router.post('/login', (req, res) => {
